@@ -1,0 +1,10 @@
+[project]
+name = "minimal-agent"
+version = "0.1.0"
+description = "Minimal autonomous coding agent — Phase 1: LLM interface + tool calling loop"
+requires-python = ">=3.14"
+dependencies = [
+    "anthropic>=0.105.2",
+    "google-genai>=2.7.0",
+    "python-dotenv>=1.2.2",
+]
