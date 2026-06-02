@@ -3,6 +3,10 @@ agent.py — the entry point and the loop.
 
 Usage:
     python agent.py "your task here"
+    python agent.py "your task here" --workdir ./sandbox
+
+All files the agent reads/writes are scoped to --workdir (default: ./sandbox).
+Source files stay clean.
 
 The loop:
     1. Build initial messages with the user's task
@@ -12,12 +16,13 @@ The loop:
     5. Hard cap at MAX_ITERATIONS to prevent runaway loops
 """
 
+import argparse
 import os
 import sys
 from dotenv import load_dotenv
 
 from llm import call_llm, build_assistant_message, build_tool_result_message
-from tools import TOOL_SCHEMAS, execute_tool
+from tools import TOOL_SCHEMAS, execute_tool, set_workdir
 
 # ---------------------------------------------------------------------------
 # Config
@@ -43,14 +48,17 @@ def print_separator(label: str = "") -> None:
 # Agent loop
 # ---------------------------------------------------------------------------
 
-def run_agent(task: str) -> None:
+def run_agent(task: str, workdir: str = "./sandbox") -> None:
     """Run the agent loop for the given task."""
     load_dotenv()
+
+    # Set the sandbox directory — all tool file ops are scoped here
+    set_workdir(workdir)
 
     provider = os.getenv("LLM_PROVIDER", "anthropic")
     print_separator("task")
     print(task)
-    print(f"\nprovider: {provider}")
+    print(f"\nprovider: {provider}  |  workdir: {workdir}")
     print_separator()
 
     # Seed the conversation with the user's task
@@ -121,9 +129,12 @@ def run_agent(task: str) -> None:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python agent.py \"your task here\"")
-        sys.exit(1)
-
-    task = " ".join(sys.argv[1:])
-    run_agent(task)
+    parser = argparse.ArgumentParser(description="Minimal autonomous coding agent")
+    parser.add_argument("task", nargs="+", help="The task for the agent to complete")
+    parser.add_argument(
+        "--workdir",
+        default="./sandbox",
+        help="Directory where the agent reads/writes files (default: ./sandbox)",
+    )
+    args = parser.parse_args()
+    run_agent(" ".join(args.task), workdir=args.workdir)

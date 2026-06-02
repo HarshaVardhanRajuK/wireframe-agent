@@ -11,3 +11,13 @@ wheels/
 
 # Environment variables — never commit secrets
 .env
+
+# Agent-generated files (created during task runs)
+sandbox/
+
+# Legacy generated files from before sandbox was introduced
+utils.py
+calculator.py
+math_utils.py
+test_calculator.py
+test_math_utils.py
